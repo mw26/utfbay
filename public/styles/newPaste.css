@@ -1,0 +1,44 @@
+.chooseLanguage label {
+	font-size: 0.7em;
+	color: #999;
+} 
+
+.chooseLanguage {
+	float: right;
+} 
+
+form#editor {
+	margin: 0px 25px;
+}
+
+form#editor textarea {
+	border: 1px solid #DDD;
+	border-radius: 5px;
+	padding: 5px;
+	font-family: Inconsolata,Monaco,Consolas,"Courier New",monospace;
+	font-size: 14px;
+	background: none repeat scroll 0% 0% rgba(255, 255, 255, 0.898);
+}
+
+.pasteBox {
+	width: 99%;
+}
+
+div.submit input {
+	vertical-align: middle;
+	padding: 7px 15px;
+}
+
+div.submit {
+	margin-top: -1px;
+	float: right;
+}
+
+.submit .locker {
+    margin-right: 1.7em;
+}
+
+.legend {
+	font-size: 0.85em;
+	vertical-align: middle;
+}

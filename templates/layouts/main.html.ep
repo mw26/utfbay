@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<title><%= $title %></title>\
+		<%
+			my @styles= qw(styles.css);
+			my $extraStyles= stash('extraStyles');
+			
+			if($extraStyles) {
+				if(ref $extraStyles eq 'ARRAY') {
+					@styles= (@styles, @$extraStyles);
+				}
+				elsif (ref $extraStyles eq '') {
+					push @styles, $extraStyles;
+				}
+			}
+		%>
+		%foreach(@styles) {
+			<link rel="stylesheet" type="text/css" href="<%= "/styles/$_" %>">
+		%}
+	</head>
+
+	<body>
+		<%= include 'theme/header' %>
+		<div id="container">
+			<div id="content">
+				<div class="body">
+					% my $notice= stash 'notice';
+					% if (defined $notice) {
+						<p class="notice">
+							<%= $notice %>
+						</p>
+					%}
+					<%= content %>
+				</div>
+			</div>
+		</div>
+	</body>
+</html> 

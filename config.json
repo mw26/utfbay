@@ -1,0 +1,7 @@
+{
+	"database": {
+		"dbname": "ubdb",
+		"password":"password",
+		"username":"mysql"
+	}
+}	

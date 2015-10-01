@@ -1,0 +1,14 @@
+<div id="header"> 
+	<div class="body">
+		<div class="welcome">
+			<a href="/">
+				This is not Pastie
+			</a>
+		</div>
+		<ul id="nav">
+			<li><a href="/foo">Share</a></li>
+			<li><a href="/bar">Browse</a></li>
+		</ul>
+		<div style="clear:both"></div>
+	</div>
+</div>
