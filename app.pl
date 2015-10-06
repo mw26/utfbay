@@ -3,13 +3,11 @@
 use Mojolicious::Lite;
 use lib 'lib';
 use DBI_Wrapper;
-require bytes;
 
-our $VERSION= v0.01;
+our $VERSION= v0.02;
 
 use constant {
 	PASTE_MESSAGE_SIZE => 75776,
-	MAX_PASTE_SIZE => 65535
 };
 
 my $conf= plugin JSONConfig => {file => 'config.json'};
@@ -27,27 +25,26 @@ hook after_build_tx => sub {
 	
 };
 
-
 get '/' => sub {
   my $c = shift;
 
   $c->render(template => 'index');
 };
 
-post '/pastes' => sub {
+get  '/pastes/:id' => [id => qr/\d+/] => sub {
+	my $c=  shift;
+	my $id= $c->param('id');
+
+	$c->render(text => $id, title => "#$id - paste");
+};
+
+post '/pastes' => sub { #ajax
 	my $c = shift;
-	my $pasteRef= \$c->req->body_params->param('paste[body]');
-	my $langRef= \$c->req->body_params->param('paste[langList]');
+	my $pasteRef= \$c->req->param('content');
+	my $lang= $c->req->param('lang');
 
-	if (	bytes::length($$pasteRef) > MAX_PASTE_SIZE ) {
-		$c->stash(notice => 'Paste cannot be larger than 64KB!');
-
-	}
-	else {
-		my $lang= $dbw->langDefined($$langRef);
-		$dbw->savePaste($pasteRef, $lang);
-	}
-	$c->render(template => 'foo', title => 'bar');
+	#params are checked and untainted inside savePaste method
+	$c->render(json => $dbw->savePaste($pasteRef, $lang));
 };
 
 app->start; 

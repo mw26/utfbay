@@ -1,23 +1,41 @@
+<% my @defaultStyles= qw(
+	/styles/styles.css
+);
+my @defaultScripts= qw (
+	http://code.jquery.com/jquery-2.1.4.min.js
+);
+%>
+% my $cssBlock= begin
+<link rel="stylesheet" type="text/css" href="<%= "$_[0]" %>">\
+% end
+% my $jsBlock= begin
+<script src="<%= "$_[0]" %>"></script>\
+% end
+% my $inlinePageData= begin
+	<%	my $argsRef=	stash(pop);
+		my $markup=	pop;
+		my @defaults=	@_;
+	
+		if($argsRef) {
+			if(ref $argsRef eq 'ARRAY') {
+				@defaults= (@defaults, @$argsRef);
+			}
+			elsif (ref $argsRef eq '') {
+				push @defaults, $argsRef;
+			}
+		}
+	%>
+		%foreach(@defaults) {
+			%= $markup->($_);
+		%}
+% end
+\
 <!DOCTYPE html>
 <html>
 	<head>
 		<title><%= $title %></title>\
-		<%
-			my @styles= qw(styles.css);
-			my $extraStyles= stash('extraStyles');
-			
-			if($extraStyles) {
-				if(ref $extraStyles eq 'ARRAY') {
-					@styles= (@styles, @$extraStyles);
-				}
-				elsif (ref $extraStyles eq '') {
-					push @styles, $extraStyles;
-				}
-			}
-		%>
-		%foreach(@styles) {
-			<link rel="stylesheet" type="text/css" href="<%= "/styles/$_" %>">
-		%}
+		%= $inlinePageData->(@defaultStyles, $cssBlock, 'pageStyles');
+		%= $inlinePageData->(@defaultScripts, $jsBlock, 'pageScripts');
 	</head>
 
 	<body>
@@ -25,12 +43,15 @@
 		<div id="container">
 			<div id="content">
 				<div class="body">
-					% my $notice= stash 'notice';
-					% if (defined $notice) {
+						% my $notice= stash 'notice';
+						% if (defined $notice) {
 						<p class="notice">
-							<%= $notice %>
+							<= $notice %>
+						%}
+						%else {
+						<p class="notice" style="display:none">
+						%}
 						</p>
-					%}
 					<%= content %>
 				</div>
 			</div>

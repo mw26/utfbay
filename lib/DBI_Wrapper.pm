@@ -1,6 +1,8 @@
 package DBI_Wrapper; 
 
-$DBI_Wrapper::VERSION= v0.02;
+require bytes;
+
+$DBI_Wrapper::VERSION= v0.05;
 
 use strict;
 use DBI;
@@ -8,7 +10,12 @@ use DBI;
 use constant {
 	PR_LANG_SIZE		=> 32,
 	INSERT_BLOB_SQL		=> 'INSERT INTO blobs (content) VALUES (?);',
-	INSERT_PASTE_SQL	=> 'INSERT INTO publicPastes (content, lang) VALUES (?, ?);' 
+	INSERT_PASTE_SQL	=> 'INSERT INTO publicPastes (content, lang) VALUES (?, ?);',
+	SELECT_PUBLIC_PASTE	=> 'SELECT b.content, l.name, p.timestamp FROM publicPastes p
+					INNER JOIN blobs b ON p.content=b.id
+					LEFT JOIN languages l ON p.lang=l.id
+				    WHERE p.id = ?;',
+	MAX_PASTE_SIZE => 65535
 };
 
 sub new {
@@ -48,7 +55,7 @@ sub new {
 	return $self;
 }
 
-sub langDefined {
+sub __checkLang {
 	return undef if length $_[1] > PR_LANG_SIZE;
 	
 	my ($self, $lang)= @_;
@@ -61,10 +68,30 @@ sub getLangs {
 	return [sort {$a cmp $b} keys %{$_[0]->{langs}}];
 }
 
+sub __badContent {
+	my $pasteRef= $_[-1];
+
+	if (	bytes::length($$pasteRef) > MAX_PASTE_SIZE ) {
+		return {error => 'Paste cannot be larger than 64KB!'};
+
+	}
+	elsif ( length($$pasteRef) == 0 ) {
+		return {error => 'Your paste is empty!'};
+	}
+
+	return ();
+}
+
+#return structure with error or url to new paste, must be treated as json
 sub savePaste {
 	my ($self, $pasteRef, $lang)= @_;
 	my $pasteId;
 	my $dbh= $self->{dbh};
+	my $jsonResp;
+
+	$jsonResp= __badContent($pasteRef) and return $jsonResp;
+	$lang= $self->__checkLang($lang);
+
 
 	$self->__reviveConnection;
 
@@ -77,11 +104,10 @@ sub savePaste {
 
 	if ($@) {
 		$dbh->rollback;
-		die $@;
-		return undef;
+		return {error => 'Database error. Try again later.'};
 	}
 	else {
-		return $pasteId;
+		return {redirect => "/pastes/$pasteId"};
 	}
 
 }

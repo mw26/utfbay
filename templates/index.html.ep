@@ -1,5 +1,6 @@
 <%	stash title => 'New paste',
-	extraStyles => 'newPaste.css'; 
+	pageStyles => '/styles/newPaste.css', 
+	pageScripts => '/scripts/sendPaste.js'; 
 %>
 
 <form id="editor" class="newPaste" method="post" enctype="multipart/form-data" action="/pastes" accept-charset="UTF-8">
