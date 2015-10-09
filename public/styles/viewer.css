@@ -1,0 +1,27 @@
+.headers {
+	font-size: 0.85em;
+	background-color: #EEE; 
+	padding: 10px 20px;
+	border-radius: 7px 7px 0px 0px;
+	border-bottom: 1px solid #DDD;
+}	
+
+.headers p {
+	margin: 0px;
+	font-weight: 400;
+	font-size: 0.95em;
+	color: #333;
+}
+
+.pasteDate {
+	color: #999;
+	font-size: 0.9em;
+}
+
+div #content {
+	width: 75%;
+}
+
+#content .body {
+	padding: 15px 0;
+}

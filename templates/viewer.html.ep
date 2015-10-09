@@ -1,0 +1,23 @@
+<%
+	my @scripts= qw(/scripts/viewerStuff.js);
+	if(defined $paste->{language}) {
+	push @scripts,	"https://google-code-prettify.googlecode.com/svn/loader/run_prettify.js?$paste->{language}";
+	}
+
+	stash title	=> "#$paste->{id} - paste",
+	pageStyles	=> [qw(/styles/viewer.css /styles/code/sunburst.css)],
+	pageScripts	=> \@scripts,
+
+%>
+%my $data= stash('data');
+<div class="headers">
+	<p>
+		%=$paste->{language};
+		<span class="pasteDate" style="padding-left:1em"><%=$paste->{date};%></span>
+	</p>
+</div> 
+<div class="body">
+	<pre class="prettyprint linenums" style="overflow-y:auto">
+%=		$paste->{content};
+	</pre>
+</div>

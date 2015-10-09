@@ -3,7 +3,6 @@ package DBI_Wrapper;
 require bytes;
 
 $DBI_Wrapper::VERSION= v0.05;
-
 use strict;
 use DBI;
 
@@ -11,10 +10,11 @@ use constant {
 	PR_LANG_SIZE		=> 32,
 	INSERT_BLOB_SQL		=> 'INSERT INTO blobs (content) VALUES (?);',
 	INSERT_PASTE_SQL	=> 'INSERT INTO publicPastes (content, lang) VALUES (?, ?);',
-	SELECT_PUBLIC_PASTE	=> 'SELECT b.content, l.name, p.timestamp FROM publicPastes p
+	SELECT_PUBLIC_PASTE	=> q(SELECT b.content, l.name language, DATE_FORMAT(p.timestamp, '%M %d, %Y') date, p.id FROM publicPastes p
 					INNER JOIN blobs b ON p.content=b.id
 					LEFT JOIN languages l ON p.lang=l.id
-				    WHERE p.id = ?;',
+				    WHERE p.id = ?;),
+	DATABASE_ERROR		=>  {error => 'Database error. Try again later.'},
 	MAX_PASTE_SIZE => 65535
 };
 
@@ -33,7 +33,8 @@ sub new {
 
 	$dbStuff{attr}= {
 		AutoCommit => 0,  # enable transactions, if possible
-		RaiseError => 1
+		RaiseError => 1,
+		mysql_enable_utf8 => 1
 	};
 
 	my $self= bless {
@@ -97,19 +98,42 @@ sub savePaste {
 
 	eval {
 		local $SIG{'__DIE__'};
-		my $blobId= $self->__insertBlob($$pasteRef) or die $DBI::errstr;
-		$pasteId= $self->__insertPaste($blobId, $lang) or die $DBI::errstr;
+		my $blobId= $self->__insertBlob($$pasteRef);
+		$pasteId= $self->__insertPaste($blobId, $lang);
 		$dbh->commit;
 	};
 
 	if ($@) {
 		$dbh->rollback;
-		return {error => 'Database error. Try again later.'};
+		return DATABASE_ERROR;
 	}
 	else {
 		return {redirect => "/pastes/$pasteId"};
 	}
 
+}
+
+sub getPaste {
+	my ($self, $id) = @_;
+	$id+= 0;
+
+	$self->__reviveConnection;
+	my $dbh= $self->{dbh};
+	my $row;
+	
+	eval {
+		my $sth= $dbh->prepare(SELECT_PUBLIC_PASTE);
+		$sth->execute($id);
+		$row= $sth->fetchrow_hashref();
+	};
+	if ($@) {
+		return DATABASE_ERROR;
+	}
+	elsif (!defined $row) {
+		return {error => "Paste $id doesn't exists! Why not create a new one?"};
+	}
+
+	return $row;
 }
 
 sub __insertPaste {

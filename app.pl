@@ -34,8 +34,16 @@ get '/' => sub {
 get  '/pastes/:id' => [id => qr/\d+/] => sub {
 	my $c=  shift;
 	my $id= $c->param('id');
+	my $data= $dbw->getPaste($id);
 
-	$c->render(text => $id, title => "#$id - paste");
+	if(defined $data and exists $data->{'error'}) {
+		$c->flash(notice => $data->{'error'})
+		->redirect_to('/');
+	}
+
+	$c->stash(paste => $data);
+
+	$c->render(template => 'viewer');
 };
 
 post '/pastes' => sub { #ajax

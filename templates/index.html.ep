@@ -2,27 +2,28 @@
 	pageStyles => '/styles/newPaste.css', 
 	pageScripts => '/scripts/sendPaste.js'; 
 %>
+<div class="body">
+	<form id="editor" class="newPaste" method="post" enctype="multipart/form-data" action="/pastes" accept-charset="UTF-8">
+		<div class="chooseLanguage">
+			<label>Language</label>
+			<select id="langList" name="paste[langList]">
+				<option value="" selected="selected">Plain text</option>
+	% foreach(@$langs) {
 
-<form id="editor" class="newPaste" method="post" enctype="multipart/form-data" action="/pastes" accept-charset="UTF-8">
-	<div class="chooseLanguage">
-		<label>Language</label>
-		<select id="langList" name="paste[langList]">
-			<option value="" selected="selected">Plain text</option>
-% foreach(@$langs) {
-
-			<option value="<%=$_%>"><%=$_%></option>
-%}
-		</select>
-	</div>
-	
-	<p>
-		<textarea id="pasteBody" class="pasteBox" tabindex="20" rows="22" name="paste[body]" cols="40"></textarea>
-	</p>
-	<div class="submit" style="margin-buttom:0;">
-		<span class="locker">
-			<label class="legend">Make paste private? <input type="checkbox" value="private" title="Mark paste private"></label>
-		</span>
-		<input type="submit" value= "Create Paste" tabindex="30" name="commit">
-	</div>
-	<div style="clear:both"></div>
-</form>
+				<option value="<%=$_%>"><%=$_%></option>
+	%}
+			</select>
+		</div>
+		
+		<p>
+			<textarea id="pasteBody" class="pasteBox" tabindex="20" rows="22" name="paste[body]" cols="40"></textarea>
+		</p>
+		<div class="submit" style="margin-buttom:0;">
+			<span class="locker">
+				<label class="legend">Make paste private? <input type="checkbox" value="private" title="Mark paste private"></label>
+			</span>
+			<input type="submit" value= "Create Paste" tabindex="30" name="commit">
+		</div>
+		<div style="clear:both"></div>
+	</form>
+</div>

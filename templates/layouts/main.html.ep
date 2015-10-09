@@ -42,18 +42,16 @@ my @defaultScripts= qw (
 		<%= include 'theme/header' %>
 		<div id="container">
 			<div id="content">
-				<div class="body">
-						% my $notice= stash 'notice';
+						% my $notice= flash 'notice';
 						% if (defined $notice) {
 						<p class="notice">
-							<= $notice %>
+							<%= $notice %>
 						%}
 						%else {
 						<p class="notice" style="display:none">
 						%}
 						</p>
 					<%= content %>
-				</div>
 			</div>
 		</div>
 	</body>

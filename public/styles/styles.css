@@ -23,10 +23,6 @@ body {
     min-height: 400px;
 }
 
-#content .body {
-    padding: 15px 30px;
-}
-
 #header {
 	position: relative;
 	background-color: #285174;
@@ -93,4 +89,8 @@ p.notice {
 	border: 1px solid #FFA500;
 	margin-top: 0px;
 	font-size: 0.8em;
+}
+
+#content .body {
+    padding: 15px 30px;
 }

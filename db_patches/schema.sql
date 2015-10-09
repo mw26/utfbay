@@ -20,13 +20,13 @@ CREATE TABLE IF NOT EXISTS blobs (
 
 	PRIMARY KEY 		(id)
 
-) ENGINE=InnoDB DEFAULT CHARSET=latin1 COLLATE latin1_swedish_ci COMMENT 'Pastes content.';
+) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE utf8_general_ci COMMENT 'Pastes content.';
 
 CREATE TABLE IF NOT EXISTS publicPastes (
 	id 			INT UNSIGNED NOT NULL AUTO_INCREMENT,
 	content			INT UNSIGNED NOT NULL,
 	lang			SMALLINT NULL,
-	timestamp		TIMESTAMP(6) NOT NULL,
+	timestamp		TIMESTAMP(10) NOT NULL,
 
 	PRIMARY KEY 		(id),
 	FOREIGN KEY		(content) REFERENCES blobs(id)
