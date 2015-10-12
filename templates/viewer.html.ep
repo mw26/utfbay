@@ -13,11 +13,11 @@
 <div class="headers">
 	<p>
 		%=$paste->{language};
-		<span class="pasteDate" style="padding-left:1em"><%=$paste->{date};%></span>
+		<span class="pasteLegend" style="padding-left:1em"><%=$paste->{date};%></span>
 	</p>
 </div> 
-<div class="body">
-	<pre class="prettyprint linenums" style="overflow-y:auto">
+	<pre class="prettyprint linenums" style="overflow-x:auto">
 %=		$paste->{content};
 	</pre>
-</div>
+		<span class="pasteLegend" style="float:right"><%= $paste->{length} %> characters / <%= $paste->{lines} %> lines</span>
+<%= $paste->{lold} %>

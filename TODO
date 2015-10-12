@@ -1,0 +1,7 @@
+Need to fix possibility of SHA384 repetitions:
+	sub __insertPrivare
+
+Do something with ugly route handlers:
+	get '/:stat/:id' => [stat => 'private', id => qr/[-_A-Za-z0-9]{64}/] => \&viewPastes; 
+	get  '/:stat/:id' => [stat => 'pastes', id => qr/\d{1,10}/] =>  \&viewPastes;
+

@@ -2,7 +2,11 @@ package DBI_Wrapper;
 
 require bytes;
 
-$DBI_Wrapper::VERSION= v0.05;
+use MIME::Base64 qw(encode_base64url decode_base64url);
+use Time::HiRes qw(gettimeofday);
+use Digest::SHA qw(sha384_base64);
+
+$DBI_Wrapper::VERSION= v0.1;
 use strict;
 use DBI;
 
@@ -10,10 +14,17 @@ use constant {
 	PR_LANG_SIZE		=> 32,
 	INSERT_BLOB_SQL		=> 'INSERT INTO blobs (content) VALUES (?);',
 	INSERT_PASTE_SQL	=> 'INSERT INTO publicPastes (content, lang) VALUES (?, ?);',
-	SELECT_PUBLIC_PASTE	=> q(SELECT b.content, l.name language, DATE_FORMAT(p.timestamp, '%M %d, %Y') date, p.id FROM publicPastes p
+	INSERT_PRIV_PASTE_SQL	=> 'INSERT INTO privatePastes (content, lang, pkey) VALUES (?, ?, ?);',
+	SELECT_PUBLIC_PASTE	=> q(SELECT b.content, l.name language, DATE_FORMAT(p.timestamp, '%M %d, %Y') date, p.id, CHARACTER_LENGTH(b.content) length
+       	FROM publicPastes p
 					INNER JOIN blobs b ON p.content=b.id
 					LEFT JOIN languages l ON p.lang=l.id
 				    WHERE p.id = ?;),
+	SELECT_PRIV_PASTE	=> q(SELECT b.content, l.name language, DATE_FORMAT(p.timestamp, '%M %d, %Y') date, p.id, CHARACTER_LENGTH(b.content) length
+       	FROM privatePastes p
+					INNER JOIN blobs b ON p.content=b.id
+					LEFT JOIN languages l ON p.lang=l.id
+				    WHERE p.pkey = ?;),
 	DATABASE_ERROR		=>  {error => 'Database error. Try again later.'},
 	MAX_PASTE_SIZE => 65535
 };
@@ -59,9 +70,10 @@ sub new {
 sub __checkLang {
 	return undef if length $_[1] > PR_LANG_SIZE;
 	
-	my ($self, $lang)= @_;
+	my ($h, $lang)= @_;
+	$h= $h->{langs};
 	
-	return exists $self->{langs}->{$lang} ? $lang : undef;
+	return exists $h->{$lang} ? $h->{$lang} : undef;
 }
 
 sub getLangs {
@@ -83,12 +95,13 @@ sub __badContent {
 	return ();
 }
 
-#return structure with error or url to new paste, must be treated as json
+#return structure with error or url to new paste; must be treated as json
 sub savePaste {
-	my ($self, $pasteRef, $lang)= @_;
+	my ($self, $pasteRef, $lang, $priv)= @_;
 	my $pasteId;
 	my $dbh= $self->{dbh};
 	my $jsonResp;
+	my $url;
 
 	$jsonResp= __badContent($pasteRef) and return $jsonResp;
 	$lang= $self->__checkLang($lang);
@@ -99,7 +112,15 @@ sub savePaste {
 	eval {
 		local $SIG{'__DIE__'};
 		my $blobId= $self->__insertBlob($$pasteRef);
-		$pasteId= $self->__insertPaste($blobId, $lang);
+		if($priv eq 'false') {
+			$pasteId= $self->__insertPublic($blobId, $lang);
+			$url= "pastes/$pasteId";
+		}
+		else {
+			$pasteId= $self->__insertPrivate($blobId, $lang);
+			$url= "private/$pasteId";
+		}
+
 		$dbh->commit;
 	};
 
@@ -108,22 +129,31 @@ sub savePaste {
 		return DATABASE_ERROR;
 	}
 	else {
-		return {redirect => "/pastes/$pasteId"};
+		return {redirect => $url};
 	}
 
 }
 
 sub getPaste {
-	my ($self, $id) = @_;
-	$id+= 0;
+	my ($self, $id, $priv) = @_;
 
 	$self->__reviveConnection;
 	my $dbh= $self->{dbh};
 	my $row;
-	
+	my $sth;
+
 	eval {
-		my $sth= $dbh->prepare(SELECT_PUBLIC_PASTE);
-		$sth->execute($id);
+		if(!defined $priv) {
+			$sth= $dbh->prepare(SELECT_PUBLIC_PASTE);
+			$id+= 0;
+
+			$sth->execute($id);
+		}
+		else {
+			$sth= $dbh->prepare(SELECT_PRIV_PASTE);
+			$sth->execute(decode_base64url($id));
+		}
+
 		$row= $sth->fetchrow_hashref();
 	};
 	if ($@) {
@@ -133,17 +163,26 @@ sub getPaste {
 		return {error => "Paste $id doesn't exists! Why not create a new one?"};
 	}
 
+	$row->{lines}= $row->{content} =~ tr/\n// +1;
+
 	return $row;
 }
 
-sub __insertPaste {
-	my $self= shift;
-	my $blobId= $_[0];
-	my $langId= undef;
+sub __insertPrivate {
+	my ($self, $blobId, $langId)= @_;
 
-	if(defined $_[1]) {
-       		$langId= $self->{langs}->{$_[1]};
-	}
+	my $dbh= $self->{dbh};
+	
+	my $digest= sha384_base64(gettimeofday());
+	$digest =~ tr\+/\-_\;
+	$digest;
+
+	$dbh->do(INSERT_PRIV_PASTE_SQL, undef, $blobId, $langId,  decode_base64url($digest)) or die $DBI::errstr;
+	return $digest;
+}
+
+sub __insertPublic {
+	my ($self, $blobId, $langId)= @_;
 
 	my $dbh= $self->{dbh};
 	$dbh->do(INSERT_PASTE_SQL, undef, $blobId, $langId) or die $DBI::errstr;
