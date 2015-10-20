@@ -4,7 +4,7 @@ use Mojolicious::Lite;
 use lib 'lib';
 use DBI_Wrapper;
 
-our $VERSION= v0.2;
+our $VERSION= v0.25;
 
 use constant {
 	PASTE_MESSAGE_SIZE => 75776,
@@ -58,19 +58,41 @@ sub viewPastes {
 
 };
 
-post '/pastes' => sub { #ajax
-	my $c = shift;
-	my $pasteRef= \$c->req->param('content');
-	my $lang= $c->req->param('lang');
-	my $priv= $c->req->param('priv');
+under '/pastes/';
+	get '/' => \&browse; 
 
-	#params are checked and untainted inside savePaste method
-	$c->render(json => $dbw->savePaste($pasteRef, $lang, $priv));
-};
+	# lowest available mon will be chosen, if mon == 0 
+	get '/:year/:mon/:page' => [ year => qr/20\d{2}/, mon => qr/\d|1[0-2]/, page => qr/\d{0,4}/] =>\&browse;
+
+	sub browse { 
+		# normal or ajax
+		# first get template with GET, then get content with AJAX
+		my $c = shift;
+
+		my $header= $c->req->headers->header('X-Requested-With');
+
+		if((defined $header) and ($header eq 'XMLHttpRequest')) {
+			
+			$c->render( json => $dbw->getPaginatedPage(
+					$c->param('year'),
+					$c->param('mon'),
+					$c->param('page')
+				));
+			return;
+		}	
+
+		$c->render(template => 'browser');
+	};
+
+	post '/' => sub { #ajax
+		my $c = shift;
+		my $pasteRef= \$c->req->param('content');
+		my $lang= $c->req->param('lang');
+		my $priv= $c->req->param('priv');
+
+		# params are checked and untainted inside savePaste method
+		$c->render(json => $dbw->savePaste($pasteRef, $lang, $priv));
+	};
+under '/';
 
 app->start; 
-
-__DATA__
-@@ foo.html.ep
-
-blah-blah

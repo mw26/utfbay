@@ -1,0 +1,16 @@
+<%
+	stash title	=> 'Pastes',
+	pageStyles	=>  '/styles/browser.css',
+	pageScripts	=>  '/scripts/browsePastes.js';
+%>
+
+<h1 class="heading">Browse pastes<span></span></h1>
+<div class="months">
+	<div> </div>
+	<div> </div>
+</div>
+
+<p class="bottomNav">
+	<a href= "">Previous page</a>
+	<a href= "" style="float:right; margin-top:0;">Next page</a>
+</p>

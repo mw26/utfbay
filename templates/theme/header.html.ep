@@ -5,9 +5,19 @@
 				This is not Pastie
 			</a>
 		</div>
+			<style>
+% my %curPage= ('/' => 1, '/pastes' => 2, '/private' => 2);
+% $c->req->url =~ m'(/[^/]*)';
+%# highlight active menu item
+				#nav > li:nth-child(<%= $curPage{$1} %>) {
+					background-color: #1c3a54;
+					font-weight: bold;
+					color: #fff;
+				}
+			</style>
 		<ul id="nav">
-			<li><a href="/foo">Share</a></li>
-			<li><a href="/bar">Browse</a></li>
+			<li><a href="/">Share</a></li>
+			<li><a href="/pastes">Browse</a></li>
 		</ul>
 		<div style="clear:both"></div>
 	</div>

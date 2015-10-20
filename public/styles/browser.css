@@ -1,0 +1,67 @@
+.pastePreview {
+	cursor: pointer;
+	background-color: #f7f7ee;
+	margin-bottom: 1em;
+	padding: 7px 15px;
+	border-radius: 7px;
+	border: 1px solid #e7e7e7;
+	overflow: auto;
+}
+
+.pastePreview:hover {
+	padding-left: 12px;
+	padding-right: 12px;
+	border-left: 4px solid #39c;
+	border-right: 4px solid #39c;
+}
+
+.legendInList {
+	color: #999;
+}
+
+.pastePreview p {
+    color: #666;
+    margin: 0px 0px 0.5em;
+    font-size: 0.75em;
+}
+
+.heading {
+	font-size: 1.5em;
+}
+
+div .months {
+    font-size: 0.75em;
+    font-family: "Lucida Grande",Helvetica,Arial,sans-serif;
+    margin-top: 1em;
+    margin-bottom: 0em;
+    text-align: left;
+}
+
+div .months a {
+    padding: 2px 8px;
+    background: none repeat scroll 0% 0% #EEE;
+    border: 1px solid #E7E7E7;
+    text-decoration: none;
+    margin-right: 4px;
+}
+
+.months div {
+	margin-bottom: 1em;
+}
+
+div.months a.selected {
+    background: none repeat scroll 0% 0% #444;
+    border-color: #444;
+    color: #FFF;
+}
+
+h1 span {
+    font-size: 0.7em;
+    margin-left: 1em;
+    color: #999;
+    font-weight: normal;
+}
+
+.bottomNav {
+	padding: 0.75em;
+}

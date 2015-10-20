@@ -27,6 +27,7 @@ CREATE TABLE IF NOT EXISTS publicPastes (
 	content			INT UNSIGNED NOT NULL,
 	lang			SMALLINT NULL,
 	timestamp		TIMESTAMP(6) NOT NULL,
+	numOfLines		INT UNSIGNED NOT NULL,
 
 	PRIMARY KEY 		(id),
 	FOREIGN KEY		(content) REFERENCES blobs(id)
